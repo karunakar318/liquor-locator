@@ -550,7 +550,7 @@
       scanContext = null;
     }
 
-    function startScanner() {
+    async function startScanner() {
       if (!window.Html5Qrcode) {
         scanErrorEl.textContent = 'Scanner library failed to load.';
         return;
@@ -559,12 +559,18 @@
         html5QrCode = new Html5Qrcode('qr-reader');
       }
       const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-      html5QrCode
-        .start({ facingMode: { exact: 'environment' } }, config, onScanSuccess, onScanError)
-        .catch(err => {
-          scanErrorEl.textContent = 'Unable to start camera. Please allow camera access or try another device.';
-          console.warn(err);
-        });
+      try {
+        const cameras = await Html5Qrcode.getCameras();
+        let cameraId = null;
+        if (Array.isArray(cameras) && cameras.length) {
+          const backCam = cameras.find(c => /back|rear|environment/i.test(c.label));
+          cameraId = (backCam || cameras[0]).id;
+        }
+        await html5QrCode.start(cameraId || { facingMode: 'environment' }, config, onScanSuccess, onScanError);
+      } catch (err) {
+        scanErrorEl.textContent = 'Unable to start camera. Please allow camera access or try another device.';
+        console.warn(err);
+      }
     }
 
     function stopScanner() {
