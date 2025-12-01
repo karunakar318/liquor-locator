@@ -1,0 +1,680 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Liquor Locator</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <style>
+    :root {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: #1f1f1f;
+      background: #f4f5f7;
+    }
+    body {
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+    }
+    .page {
+      width: 100%;
+      max-width: 720px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      letter-spacing: 0.3px;
+      color: #121212;
+    }
+    p.desc {
+      margin: 0 0 16px;
+      color: #4a4a4a;
+      line-height: 1.5;
+      font-size: 16px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 1px solid #d6d8dd;
+      border-radius: 12px;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      outline: none;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .search-input:focus {
+      border-color: #2f7dff;
+      box-shadow: 0 4px 10px rgba(47, 125, 255, 0.16);
+    }
+    .barcode-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .barcode-input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border: 1px solid #d6d8dd;
+      border-radius: 12px;
+      box-sizing: border-box;
+      outline: none;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .barcode-input:focus {
+      border-color: #2f7dff;
+      box-shadow: 0 4px 10px rgba(47, 125, 255, 0.16);
+    }
+    .scan-btn {
+      padding: 12px 14px;
+      font-size: 15px;
+      border: 1px solid #d6d8dd;
+      border-radius: 12px;
+      background: #fff;
+      color: #0f172a;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+    }
+    .scan-btn:active { transform: translateY(1px); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
+    .items {
+      display: grid;
+      gap: 10px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      text-align: left;
+      display: grid;
+      gap: 6px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #111827;
+      flex: 1;
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      padding: 9px 12px;
+      font-size: 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+    .btn:active { transform: translateY(1px); }
+    .edit-btn { background: #f8fafc; color: #0f172a; }
+    .delete-btn { background: #fff1f2; color: #991b1b; border-color: #fecdd3; }
+    .meta {
+      margin: 0;
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .location {
+      margin: 0;
+      color: #374151;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .barcode {
+      margin: 0;
+      color: #6b7280;
+      font-size: 13px;
+    }
+    .empty {
+      margin: 8px 0 0;
+      color: #6b7280;
+      font-size: 15px;
+      text-align: center;
+    }
+    .form-section {
+      margin-top: 24px;
+      text-align: left;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+      padding: 16px;
+    }
+    .form-section h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: #111827;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .form-control {
+      display: grid;
+      gap: 6px;
+    }
+    .form-control label {
+      font-size: 14px;
+      color: #374151;
+    }
+    .input, .select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 15px;
+      border: 1px solid #d6d8dd;
+      border-radius: 10px;
+      box-sizing: border-box;
+      outline: none;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .input:focus, .select:focus {
+      border-color: #2f7dff;
+      box-shadow: 0 3px 10px rgba(47, 125, 255, 0.15);
+    }
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .save-btn {
+      padding: 14px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.28);
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      flex: 1;
+      min-width: 140px;
+    }
+    .save-btn:active { transform: translateY(1px); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.22); }
+    .cancel-btn {
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #f9fafb;
+      color: #111827;
+      cursor: pointer;
+      flex: 1;
+      min-width: 120px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+    .overlay.active { display: flex; }
+    .modal {
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border-radius: 16px;
+      padding: 18px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+      text-align: center;
+      display: grid;
+      gap: 12px;
+      border: 1px solid #e5e7eb;
+    }
+    #qr-reader {
+      width: 100%;
+      min-height: 260px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .scan-message { margin: 0; color: #374151; font-size: 15px; }
+    .close-btn {
+      padding: 12px 14px;
+      font-size: 15px;
+      border: none;
+      border-radius: 12px;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.24);
+      width: 100%;
+    }
+    .error-text { color: #b91c1c; font-size: 14px; margin: 0; }
+    .toast {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 1100;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    @media (max-width: 600px) {
+      body { padding: 18px; }
+      h1 { font-size: 26px; }
+      .card { padding: 12px 13px; }
+      .search-input { font-size: 16px; padding: 13px 15px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .btn-row { flex-wrap: wrap; }
+      .barcode-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <main class="page">
+    <h1>Liquor Locator</h1>
+    <p class="desc">Search for liquor items and see their location in the store.</p>
+
+    <input
+      id="search"
+      class="search-input"
+      type="search"
+      placeholder="Search by name, brand, or type..."
+      aria-label="Search liquor items"
+      autocomplete="off"
+    />
+
+    <div class="barcode-row">
+      <input
+        id="search-barcode"
+        class="barcode-input"
+        type="text"
+        placeholder="Barcode lookup..."
+        aria-label="Barcode lookup"
+        autocomplete="off"
+      />
+      <button class="scan-btn" type="button" id="search-scan-btn">Scan</button>
+    </div>
+
+    <section class="items" id="items"></section>
+
+    <section class="form-section">
+      <h3 id="form-title">Add Item</h3>
+      <form id="add-form">
+        <div class="form-grid">
+          <div class="form-control">
+            <label for="barcode">Barcode</label>
+            <div class="barcode-row">
+              <input id="barcode" name="barcode" class="input" required />
+              <button class="scan-btn" type="button" id="form-scan-btn">Scan</button>
+            </div>
+          </div>
+          <div class="form-control">
+            <label for="name">Name</label>
+            <input id="name" name="name" class="input" required />
+          </div>
+          <div class="form-control">
+            <label for="brand">Brand</label>
+            <input id="brand" name="brand" class="input" required />
+          </div>
+          <div class="form-control">
+            <label for="type">Type</label>
+            <select id="type" name="type" class="select" required>
+              <option value="">Select type</option>
+              <option>Whiskey</option>
+              <option>Vodka</option>
+              <option>Rum</option>
+              <option>Gin</option>
+              <option>Tequila</option>
+              <option>Wine</option>
+              <option>Beer</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-control">
+            <label for="size">Size</label>
+            <input id="size" name="size" class="input" placeholder="e.g., 750ml" required />
+          </div>
+          <div class="form-control">
+            <label for="aisle">Aisle</label>
+            <input id="aisle" name="aisle" class="input" required />
+          </div>
+          <div class="form-control">
+            <label for="shelf">Shelf</label>
+            <input id="shelf" name="shelf" class="input" required />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="save-btn" type="submit" id="save-btn">Save</button>
+          <button class="cancel-btn" type="button" id="cancel-btn" hidden>Cancel Edit</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="scan-modal-title">
+    <div class="modal">
+      <p class="scan-message" id="scan-modal-title">Point the camera at a barcode to scan.</p>
+      <div id="qr-reader"></div>
+      <p class="error-text" id="scan-error" aria-live="polite"></p>
+      <button class="close-btn" id="close-btn" type="button">Cancel</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
+    const STORAGE_KEY = 'liquor_items_v1';
+
+    const defaultItems = [
+      {
+        name: "Jack Daniel's Old No. 7",
+        brand: "Jack Daniel's",
+        type: "Whiskey",
+        size: "750ml",
+        aisle: "3",
+        shelf: "2",
+        barcode: "5099873000019"
+      },
+      {
+        name: "Grey Goose Original",
+        brand: "Grey Goose",
+        type: "Vodka",
+        size: "1L",
+        aisle: "1",
+        shelf: "4",
+        barcode: "080480280003"
+      },
+      {
+        name: "La Vieille Ferme Rose",
+        brand: "La Vieille Ferme",
+        type: "Wine",
+        size: "750ml",
+        aisle: "5",
+        shelf: "1",
+        barcode: "3296180000017"
+      }
+    ];
+
+    function loadItems() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (err) {
+        console.warn('Failed to load items from storage', err);
+      }
+      return [...defaultItems];
+    }
+
+    function saveItems() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      } catch (err) {
+        console.warn('Failed to save items to storage', err);
+      }
+    }
+
+    let items = loadItems();
+
+    const searchInput = document.getElementById('search');
+    const searchBarcodeInput = document.getElementById('search-barcode');
+    const searchScanBtn = document.getElementById('search-scan-btn');
+    const formScanBtn = document.getElementById('form-scan-btn');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('close-btn');
+    const scanErrorEl = document.getElementById('scan-error');
+    const itemsEl = document.getElementById('items');
+    const addForm = document.getElementById('add-form');
+    const formTitle = document.getElementById('form-title');
+    const saveBtn = document.getElementById('save-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const toastEl = document.getElementById('toast');
+
+    let editingIndex = null;
+    let html5QrCode = null;
+    let scanContext = null; // 'search' | 'form'
+
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    function renderCards(list) {
+      itemsEl.innerHTML = '';
+      if (!list.length) {
+        const empty = document.createElement('p');
+        empty.className = 'empty';
+        empty.textContent = 'No items found.';
+        itemsEl.appendChild(empty);
+        return;
+      }
+      list.forEach((item, index) => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-header">
+            <h2>${item.name}</h2>
+            <div class="btn-row">
+              <button class="btn edit-btn" data-index="${index}" type="button">Edit</button>
+              <button class="btn delete-btn" data-index="${index}" type="button">Delete</button>
+            </div>
+          </div>
+          <p class="meta">${item.type} - ${item.size}</p>
+          <p class="location">Aisle ${item.aisle} - Shelf ${item.shelf}</p>
+          <p class="barcode">Barcode: ${item.barcode}</p>
+        `;
+        itemsEl.appendChild(card);
+      });
+    }
+
+    function getFilteredItems() {
+      const term = searchInput.value.trim().toLowerCase();
+      const bc = searchBarcodeInput.value.trim();
+      if (bc) {
+        return items.filter(item => item.barcode === bc);
+      }
+      return items.filter(item => {
+        const haystack = `${item.name} ${item.brand} ${item.type}`.toLowerCase();
+        return haystack.includes(term);
+      });
+    }
+
+    function renderList() {
+      renderCards(getFilteredItems());
+    }
+
+    function resetForm() {
+      addForm.reset();
+      editingIndex = null;
+      formTitle.textContent = 'Add Item';
+      saveBtn.textContent = 'Save';
+      cancelBtn.hidden = true;
+    }
+
+    function fillForm(item) {
+      addForm.barcode.value = item.barcode;
+      addForm.name.value = item.name;
+      addForm.brand.value = item.brand;
+      addForm.type.value = item.type;
+      addForm.size.value = item.size;
+      addForm.aisle.value = item.aisle;
+      addForm.shelf.value = item.shelf;
+    }
+
+    function openOverlay(context) {
+      scanContext = context;
+      scanErrorEl.textContent = '';
+      overlay.classList.add('active');
+      startScanner();
+    }
+
+    function closeOverlay() {
+      stopScanner();
+      overlay.classList.remove('active');
+      scanContext = null;
+    }
+
+    function startScanner() {
+      if (!window.Html5Qrcode) {
+        scanErrorEl.textContent = 'Scanner library failed to load.';
+        return;
+      }
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode('qr-reader');
+      }
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      html5QrCode
+        .start({ facingMode: { exact: 'environment' } }, config, onScanSuccess, onScanError)
+        .catch(err => {
+          scanErrorEl.textContent = 'Unable to start camera. Please allow camera access or try another device.';
+          console.warn(err);
+        });
+    }
+
+    function stopScanner() {
+      if (html5QrCode) {
+        html5QrCode.stop().catch(() => {}).finally(() => {
+          html5QrCode.clear().catch(() => {});
+        });
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      if (scanContext === 'form') {
+        addForm.barcode.value = decodedText;
+        showToast('Barcode scanned');
+      } else if (scanContext === 'search') {
+        searchBarcodeInput.value = decodedText;
+        renderList();
+        showToast('Barcode scanned');
+      }
+      closeOverlay();
+    }
+
+    function onScanError(err) {
+      if (typeof err === 'string' && err.toLowerCase().includes('not allowed')) {
+        scanErrorEl.textContent = 'Camera permission denied. Please allow access to scan.';
+      }
+    }
+
+    searchInput.addEventListener('input', () => {
+      searchBarcodeInput.value = '';
+      renderList();
+    });
+
+    searchBarcodeInput.addEventListener('input', () => {
+      renderList();
+    });
+
+    searchScanBtn.addEventListener('click', () => openOverlay('search'));
+    formScanBtn.addEventListener('click', () => openOverlay('form'));
+    closeBtn.addEventListener('click', closeOverlay);
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) {
+        closeOverlay();
+      }
+    });
+
+    itemsEl.addEventListener('click', event => {
+      const target = event.target;
+      if (target.classList.contains('edit-btn')) {
+        const index = Number(target.dataset.index);
+        const item = items[index];
+        editingIndex = index;
+        fillForm(item);
+        formTitle.textContent = 'Edit Item';
+        saveBtn.textContent = 'Update';
+        cancelBtn.hidden = false;
+        addForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      if (target.classList.contains('delete-btn')) {
+        const index = Number(target.dataset.index);
+        items.splice(index, 1);
+        if (editingIndex === index) {
+          resetForm();
+        } else if (editingIndex !== null && editingIndex > index) {
+          editingIndex -= 1;
+        }
+        saveItems();
+        renderList();
+        showToast('Item deleted');
+      }
+    });
+
+    addForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const formData = new FormData(addForm);
+      const newItem = {
+        barcode: formData.get('barcode').trim(),
+        name: formData.get('name').trim(),
+        brand: formData.get('brand').trim(),
+        type: formData.get('type').trim() || 'Other',
+        size: formData.get('size').trim(),
+        aisle: formData.get('aisle').trim(),
+        shelf: formData.get('shelf').trim()
+      };
+
+      if (editingIndex !== null) {
+        items[editingIndex] = newItem;
+        showToast('Item updated');
+      } else {
+        items.unshift(newItem);
+        showToast('Item added');
+      }
+      saveItems();
+      resetForm();
+      renderList();
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      resetForm();
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').catch(err => {
+          console.warn('Service worker registration failed', err);
+        });
+      });
+    }
+
+    renderList();
+  </script>
+</body>
+</html>

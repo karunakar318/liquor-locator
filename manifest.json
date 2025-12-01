@@ -1,0 +1,10 @@
+﻿{
+  "name": "Liquor Locator",
+  "short_name": "LiquorLocator",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#2563eb",
+  "theme_color": "#2563eb",
+  "description": "Offline-capable liquor locator with barcode search and add/edit items",
+  "icons": []
+}
