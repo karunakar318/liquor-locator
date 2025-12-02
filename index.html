@@ -468,6 +468,27 @@
     let editingIndex = null;
     let html5QrCode = null;
     let scanContext = null; // 'search' | 'form'
+    let audioCtx = null;
+
+    function playBeep() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const duration = 0.12;
+        const oscillator = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 1200;
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        oscillator.connect(gain).connect(audioCtx.destination);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + duration);
+      } catch (err) {
+        console.warn('Audio beep failed', err);
+      }
+    }
 
     function showToast(message) {
       toastEl.textContent = message;
@@ -584,11 +605,13 @@
     function onScanSuccess(decodedText) {
       if (scanContext === 'form') {
         addForm.barcode.value = decodedText;
+        playBeep();
         showToast('Barcode scanned');
       } else if (scanContext === 'search') {
         searchBarcodeInput.value = decodedText;
         renderList();
         showToast('Barcode scanned');
+        playBeep();
       }
       closeOverlay();
     }
